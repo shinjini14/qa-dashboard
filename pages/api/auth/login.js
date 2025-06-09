@@ -15,15 +15,27 @@ export default async function handler(req, res) {
   }
 
   try {
+    console.log('[Login] Attempting authentication for user:', username);
     const result = await authenticateUser(username, password);
-    
+    console.log('[Login] Authentication result:', { success: result.success, message: result.message });
+
     if (result.success) {
-      // Set HTTP-only cookie for security
-      res.setHeader('Set-Cookie', [
-        `auth-token=${result.token}; HttpOnly; Path=/; Max-Age=86400; SameSite=Strict${
-          process.env.NODE_ENV === 'production' ? '; Secure' : ''
-        }`
-      ]);
+      // Set HTTP-only cookie with production-friendly settings
+      const isProduction = process.env.NODE_ENV === 'production';
+
+      // More lenient cookie settings for production
+      let cookieValue = `auth-token=${result.token}; HttpOnly; Path=/; Max-Age=86400`;
+
+      if (isProduction) {
+        // For production, use SameSite=Lax which is more compatible
+        cookieValue += '; SameSite=Lax; Secure';
+      } else {
+        // For development
+        cookieValue += '; SameSite=Strict';
+      }
+
+      res.setHeader('Set-Cookie', cookieValue);
+      console.log('[Login] Cookie set with options:', cookieValue);
 
       return res.status(200).json({
         success: true,

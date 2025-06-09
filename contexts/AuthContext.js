@@ -23,11 +23,19 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuthStatus = async () => {
     try {
+      console.log('[AuthContext] Checking auth status...');
       const response = await axios.get('/api/auth/me');
+      console.log('[AuthContext] Auth check response:', response.data);
+
       if (response.data.success) {
         setUser(response.data.user);
+        console.log('[AuthContext] User authenticated:', response.data.user.username);
+      } else {
+        console.log('[AuthContext] Auth check failed:', response.data.message);
+        setUser(null);
       }
     } catch (error) {
+      console.log('[AuthContext] Auth check error:', error.response?.data || error.message);
       setUser(null);
     } finally {
       setLoading(false);
