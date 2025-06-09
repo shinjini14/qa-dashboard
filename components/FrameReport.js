@@ -10,7 +10,8 @@ import {
   Cancel,
   Assessment,
   Preview,
-  Notes
+  Notes,
+  CloudDownload
 } from '@mui/icons-material';
 
 export default function FrameReport({
@@ -283,6 +284,38 @@ export default function FrameReport({
                     }}
                   >
                     Reject
+                  </Button>
+                </Box>
+
+                {/* Download Report Button - At the very end */}
+                <Box sx={{ mt: 3, textAlign: 'center' }}>
+                  <Button
+                    variant="outlined"
+                    size="large"
+                    startIcon={<CloudDownload />}
+                    onClick={() => {
+                      const downloadUrl = `/api/qa/download-report?qa_task_id=${task.qa_task_id}`;
+                      window.open(downloadUrl, '_blank');
+                    }}
+                    sx={{
+                      py: 1.5,
+                      px: 4,
+                      borderRadius: 2,
+                      fontSize: '1rem',
+                      fontWeight: 600,
+                      textTransform: 'none',
+                      borderColor: 'rgba(48, 79, 254, 0.5)',
+                      color: '#304ffe',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        borderColor: '#304ffe',
+                        backgroundColor: 'rgba(48, 79, 254, 0.1)',
+                        boxShadow: '0 4px 20px rgba(48, 79, 254, 0.2)',
+                        transform: 'translateY(-1px)'
+                      }
+                    }}
+                  >
+                    Download QA Report
                   </Button>
                 </Box>
               </Card>

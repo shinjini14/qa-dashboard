@@ -226,6 +226,7 @@ export default function Login() {
                 onChange={handleInputChange}
                 margin="normal"
                 required
+                autoComplete="username"
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -257,6 +258,7 @@ export default function Login() {
                 onChange={handleInputChange}
                 margin="normal"
                 required
+                autoComplete="current-password"
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">

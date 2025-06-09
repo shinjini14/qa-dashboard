@@ -9,7 +9,7 @@ import {
 import {
   CheckCircle, RadioButtonUnchecked,
   ArrowForward, VideoLibrary,
-  Description, OpenInNew, CloudDownload,
+  Description, OpenInNew,
   Assignment, Preview
 } from '@mui/icons-material';
 import axios from 'axios';
@@ -400,26 +400,6 @@ export default function FrameQA({ step, task, onNext }) {
                   }}
                 />
                 <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column' }}>
-                  <Button
-                    variant="outlined"
-                    fullWidth
-                    startIcon={<CloudDownload />}
-                    onClick={() => {
-                      const downloadUrl = `/api/qa/download-report?qa_task_id=${task.qa_task_id}`;
-                      window.open(downloadUrl, '_blank');
-                    }}
-                    sx={{
-                      py:1, borderRadius:1, fontWeight:600,
-                      borderColor:'rgba(48,79,254,0.5)',
-                      color:'#304ffe',
-                      '&:hover':{
-                        borderColor:'#304ffe',
-                        backgroundColor:'rgba(48,79,254,0.1)'
-                      }
-                    }}
-                  >
-                    Download Report
-                  </Button>
                   <Button
                     variant="contained"
                     fullWidth
