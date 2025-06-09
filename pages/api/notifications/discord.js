@@ -17,12 +17,13 @@ export default async function handler(req, res) {
     status 
   } = req.body;
 
-  // Discord webhook URL - add this to your .env file
-  const discordWebhookUrl = process.env.DISCORD_WEBHOOK_URL;
+  // Discord bot token and channel ID - add these to your .env file
+  const botToken = process.env.DISCORD_BOT_TOKEN;
+  const channelId = process.env.DISCORD_CHANNEL_ID;
 
-  if (!discordWebhookUrl) {
-    console.error('[Discord] DISCORD_WEBHOOK_URL not configured');
-    return res.status(500).json({ error: 'Discord webhook not configured' });
+  if (!botToken || !channelId) {
+    console.error('[Discord] DISCORD_BOT_TOKEN or DISCORD_CHANNEL_ID not configured');
+    return res.status(500).json({ error: 'Discord bot credentials not configured' });
   }
 
   try {
@@ -102,14 +103,19 @@ export default async function handler(req, res) {
       });
     }
 
-    // Send to Discord
+    // Send to Discord using bot API
+    const discordApiUrl = `https://discord.com/api/v10/channels/${channelId}/messages`;
+
     const discordPayload = {
-      embeds: [embed],
-      username: 'QA Pipeline Bot',
-      avatar_url: 'https://cdn.discordapp.com/emojis/🎬.png'
+      embeds: [embed]
     };
 
-    await axios.post(discordWebhookUrl, discordPayload);
+    await axios.post(discordApiUrl, discordPayload, {
+      headers: {
+        'Authorization': `Bot ${botToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
 
     console.log(`[Discord] Notification sent for QA task ${qaTaskId}`);
     res.json({ success: true, message: 'Discord notification sent' });

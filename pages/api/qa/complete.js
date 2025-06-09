@@ -64,7 +64,7 @@ export default async function handler(req, res) {
 
     try {
       // Send Discord notification
-      if (process.env.DISCORD_WEBHOOK_URL) {
+      if (process.env.DISCORD_BOT_TOKEN && process.env.DISCORD_CHANNEL_ID) {
         await axios.post(`${req.headers.origin || 'http://localhost:3000'}/api/notifications/discord`, notificationData);
         console.log(`[QA Complete] Discord notification sent for task ${qa_task_id}`);
       }
