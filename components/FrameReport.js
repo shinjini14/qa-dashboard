@@ -14,6 +14,24 @@ import {
   CloudDownload
 } from '@mui/icons-material';
 
+// Convert Google Drive URL to embeddable format
+function convertDriveUrlToEmbed(driveUrl) {
+  if (!driveUrl) return null;
+
+  try {
+    // Extract file ID from Google Drive URL
+    const match = driveUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if (match && match[1]) {
+      const fileId = match[1];
+      return `https://drive.google.com/file/d/${fileId}/preview`;
+    }
+  } catch (e) {
+    console.error('Error converting drive URL:', e);
+  }
+
+  return driveUrl; // Return original if conversion fails
+}
+
 export default function FrameReport({
   task, step1Results, step2Results, finalNotes,
   onFinalNotesChange, onSubmit
@@ -351,16 +369,34 @@ export default function FrameReport({
                     mb: 2
                   }}
                 >
-                  <Box
-                    component="img"
-                    src={task.preview_url}
-                    alt="Final Preview"
-                    sx={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover'
-                    }}
-                  />
+                  {task.drive_url ? (
+                    <Box
+                      component="iframe"
+                      src={convertDriveUrlToEmbed(task.drive_url)}
+                      title="QA Video Preview"
+                      sx={{
+                        width: '100%',
+                        height: '100%',
+                        border: 0
+                      }}
+                      allow="autoplay; encrypted-media"
+                      allowFullScreen
+                    />
+                  ) : (
+                    <Box
+                      sx={{
+                        width: '100%',
+                        height: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: 'rgba(0,0,0,0.5)',
+                        color: 'text.secondary'
+                      }}
+                    >
+                      <Preview sx={{ fontSize: 48 }} />
+                    </Box>
+                  )}
                   <Chip
                     label={successRate >= 80 ? 'Approved' : 'Needs Review'}
                     size="small"
@@ -378,8 +414,31 @@ export default function FrameReport({
                 </Box>
 
                 <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
-                  {task.script_title}
+                  {task.title || task.script_title || `QA Task #${task.qa_task_id}`}
                 </Typography>
+
+                {task.drive_url && (
+                  <Box sx={{ mt: 1, textAlign: 'center' }}>
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      onClick={() => window.open(task.drive_url, '_blank')}
+                      sx={{
+                        fontSize: '0.75rem',
+                        py: 0.5,
+                        px: 1,
+                        borderColor: 'rgba(48, 79, 254, 0.3)',
+                        color: '#304ffe',
+                        '&:hover': {
+                          borderColor: '#304ffe',
+                          backgroundColor: 'rgba(48, 79, 254, 0.1)'
+                        }
+                      }}
+                    >
+                      Open Full Video
+                    </Button>
+                  </Box>
+                )}
               </Card>
             </Slide>
           </Grid>
