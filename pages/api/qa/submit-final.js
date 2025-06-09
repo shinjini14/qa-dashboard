@@ -1,8 +1,8 @@
 import pool from '../utils/db';
 
-import pool from '../../utils/db';
-import { moveCard, addComment } from '../../utils/trello';
-import { notifyDiscord } from '../../utils/discord';
+
+import { moveCard, addComment } from '../utils/trello';
+import { notifyDiscord } from '../utils/discord';
 
 export default async function handler(req, res) {
   const { qa_task_id, frame1, frame2, finalNotes } = req.body;
