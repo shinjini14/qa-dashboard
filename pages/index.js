@@ -1,13 +1,18 @@
 // pages/index.js
 import React, { useState, useEffect } from 'react';
 import { Box, CircularProgress } from '@mui/material';
+import { useRouter } from 'next/router';
 import Layout from '../components/Layout';
 import FrameWelcome from '../components/FrameWelcome';
 import FrameQA from '../components/FrameQA';
 import FrameReport from '../components/FrameReport';
+import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 
 export default function Home() {
+  const router = useRouter();
+  const { isAuthenticated, loading: authLoading } = useAuth();
+
   const [page, setPage]                 = useState('welcome');
   const [accounts, setAccounts]         = useState([]);
   const [selectedAccount, setSelectedAccount] = useState(null);
@@ -19,6 +24,13 @@ export default function Home() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState('');
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      router.replace('/login');
+    }
+  }, [isAuthenticated, authLoading, router]);
 
   useEffect(() => {
     axios
@@ -84,7 +96,8 @@ export default function Home() {
       .finally(() => setLoading(false));
   };
 
-  if (loading) {
+  // Show loading while checking authentication or during operations
+  if (authLoading || loading) {
     return (
       <Layout>
         <Box
@@ -99,6 +112,11 @@ export default function Home() {
         </Box>
       </Layout>
     );
+  }
+
+  // Don't render anything if not authenticated (will redirect)
+  if (!isAuthenticated) {
+    return null;
   }
 
   return (

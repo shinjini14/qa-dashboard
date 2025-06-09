@@ -9,15 +9,7 @@ export function middleware(request) {
   // API routes that don't require authentication
   const publicApiRoutes = [
     '/api/auth/login',
-    '/api/auth/init-db',
-    '/api/test-db',
-    '/api/test-env',
-    '/api/setup-test-data',
-    '/api/quick-setup',
-    '/api/accounts',
-    '/api/qa/next',
-    '/api/qa/preview',
-    '/api/qa/complete'
+    '/api/auth/init-db'
   ];
 
   // Check if the current path is public
@@ -25,35 +17,26 @@ export function middleware(request) {
     return NextResponse.next();
   }
 
-  // For API routes
+  // For API routes - let most API routes handle their own authentication
   if (pathname.startsWith('/api/')) {
     if (publicApiRoutes.includes(pathname)) {
       return NextResponse.next();
     }
 
-    const token = request.cookies.get('auth-token')?.value;
-
-    // Simple token check - just verify it exists and is not empty
-    // Full JWT verification will be done in the API routes themselves
-    if (!token || token.trim() === '') {
-      return NextResponse.json(
-        { success: false, message: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
+    // Let API routes handle their own authentication
+    // This prevents middleware from interfering with API calls
     return NextResponse.next();
   }
 
-  // For page routes
+  // For page routes - simple token check, let AuthContext handle the rest
   const token = request.cookies.get('auth-token')?.value;
 
-  // Simple token check for page routes
   if (!token || token.trim() === '') {
     const loginUrl = new URL('/login', request.url);
     return NextResponse.redirect(loginUrl);
   }
 
+  // If token exists, let the page load and AuthContext will validate it
   return NextResponse.next();
 }
 

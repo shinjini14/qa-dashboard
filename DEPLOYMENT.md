@@ -27,10 +27,12 @@
    ```bash
    # Install Vercel CLI (optional)
    npm i -g vercel
-   
+
    # Or deploy via Vercel dashboard
    # Go to vercel.com → New Project → Import from GitHub
    ```
+
+2. **Important**: The `vercel.json` file has been optimized to avoid the "functions/builds conflict" error.
 
 2. **Set Environment Variables** in Vercel Dashboard:
    ```
@@ -103,6 +105,12 @@ CREATE TABLE posting_accounts (
 - Real-time saving of progress
 - Video comparison (reference vs QA video)
 - Comments and notes
+
+### ✅ Authentication & Security
+- **Persistent Sessions**: Login sessions persist across page refreshes
+- **Protected Routes**: All routes are protected and redirect to login if unauthenticated
+- **No 404 Errors**: Unauthenticated users are redirected to login instead of seeing 404
+- **Automatic Redirects**: Smart routing based on authentication status
 
 ### ✅ Notifications
 - **Discord**: Rich embed notifications with progress and links
