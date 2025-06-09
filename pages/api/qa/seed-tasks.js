@@ -1,4 +1,4 @@
-import pool from '../../utils/db';
+import pool from '../utils/db';
 
 export default async function handler(req, res) {
   if (process.env.QUIET_MODE === 'true') {

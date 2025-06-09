@@ -1,4 +1,4 @@
-// pages/api/qa/submit-final.js
+import pool from '../utils/db';
 
 import pool from '../../utils/db';
 import { moveCard, addComment } from '../../utils/trello';
