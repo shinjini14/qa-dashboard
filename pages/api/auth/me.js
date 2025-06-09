@@ -1,0 +1,38 @@
+import { getUserFromToken } from '../../../lib/auth';
+
+export default async function handler(req, res) {
+  if (req.method !== 'GET') {
+    return res.status(405).json({ success: false, message: 'Method not allowed' });
+  }
+
+  try {
+    const token = req.cookies['auth-token'];
+    
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: 'No authentication token found'
+      });
+    }
+
+    const user = await getUserFromToken(token);
+    
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid or expired token'
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      user
+    });
+  } catch (error) {
+    console.error('Auth verification error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+}

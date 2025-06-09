@@ -1,0 +1,186 @@
+// pages/api/qa/download-report.js
+import pool from '../../utils/db';
+
+export default async function handler(req, res) {
+  if (req.method !== 'GET') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  const { qa_task_id } = req.query;
+
+  if (!qa_task_id) {
+    return res.status(400).json({ error: 'QA task ID is required' });
+  }
+
+  try {
+    // Get QA task details with account information
+    const { rows } = await pool.query(`
+      SELECT 
+        qt.*,
+        pa.account as account_name
+      FROM qa_tasks qt
+      LEFT JOIN posting_accounts pa ON qt.assigned_account = pa.id
+      WHERE qt.id = $1
+    `, [qa_task_id]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'QA task not found' });
+    }
+
+    const task = rows[0];
+    
+    // Generate report content
+    const reportContent = generateReportContent(task);
+    
+    // Set headers for file download
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="QA_Report_${qa_task_id}_${task.account_name || 'Unknown'}.txt"`);
+    
+    res.status(200).send(reportContent);
+
+  } catch (error) {
+    console.error('[Download Report] Error:', error);
+    res.status(500).json({ error: 'Failed to generate report' });
+  }
+}
+
+function generateReportContent(task) {
+  const now = new Date().toISOString();
+  
+  let report = `QA REVIEW REPORT
+==========================================
+
+Report Generated: ${now}
+Task ID: #${task.id}
+Account: ${task.account_name || 'Unknown'}
+Status: ${task.status}
+Created: ${task.created_at}
+Updated: ${task.updated_at}
+
+==========================================
+LINKS AND RESOURCES
+==========================================
+
+Drive Video URL: ${task.drive_url || 'Not provided'}
+Reference Video URL: ${task.reference_url || 'Not provided'}
+
+==========================================
+STEP 1 RESULTS
+==========================================
+`;
+
+  if (task.step1_results) {
+    const step1 = task.step1_results;
+    
+    if (step1.checks) {
+      report += `\nChecklist Items:\n`;
+      Object.entries(step1.checks).forEach(([key, checked]) => {
+        const label = getChecklistLabel(key, 1);
+        report += `  ${checked ? '✅' : '❌'} ${label}\n`;
+      });
+      
+      const completedCount = Object.values(step1.checks).filter(Boolean).length;
+      const totalCount = Object.keys(step1.checks).length;
+      report += `\nStep 1 Progress: ${completedCount}/${totalCount} items completed\n`;
+    }
+    
+    if (step1.comments) {
+      report += `\nStep 1 Comments:\n${step1.comments}\n`;
+    }
+  } else {
+    report += `\nNo Step 1 results available.\n`;
+  }
+
+  report += `\n==========================================
+STEP 2 RESULTS
+==========================================
+`;
+
+  if (task.step2_results) {
+    const step2 = task.step2_results;
+    
+    if (step2.checks) {
+      report += `\nChecklist Items:\n`;
+      Object.entries(step2.checks).forEach(([key, checked]) => {
+        const label = getChecklistLabel(key, 2);
+        report += `  ${checked ? '✅' : '❌'} ${label}\n`;
+      });
+      
+      const completedCount = Object.values(step2.checks).filter(Boolean).length;
+      const totalCount = Object.keys(step2.checks).length;
+      report += `\nStep 2 Progress: ${completedCount}/${totalCount} items completed\n`;
+    }
+    
+    if (step2.comments) {
+      report += `\nStep 2 Comments:\n${step2.comments}\n`;
+    }
+  } else {
+    report += `\nNo Step 2 results available.\n`;
+  }
+
+  if (task.final_notes) {
+    report += `\n==========================================
+FINAL NOTES
+==========================================
+
+${task.final_notes}
+`;
+  }
+
+  report += `\n==========================================
+SUMMARY
+==========================================
+
+Overall Status: ${task.status}
+`;
+
+  // Calculate overall completion percentage
+  let totalItems = 0;
+  let completedItems = 0;
+
+  if (task.step1_results?.checks) {
+    const step1Checks = Object.values(task.step1_results.checks);
+    totalItems += step1Checks.length;
+    completedItems += step1Checks.filter(Boolean).length;
+  }
+
+  if (task.step2_results?.checks) {
+    const step2Checks = Object.values(task.step2_results.checks);
+    totalItems += step2Checks.length;
+    completedItems += step2Checks.filter(Boolean).length;
+  }
+
+  if (totalItems > 0) {
+    const percentage = Math.round((completedItems / totalItems) * 100);
+    report += `Overall Completion: ${completedItems}/${totalItems} items (${percentage}%)\n`;
+  }
+
+  report += `\n==========================================
+END OF REPORT
+==========================================`;
+
+  return report;
+}
+
+function getChecklistLabel(key, step) {
+  const labels = {
+    1: {
+      'correctTitleCardAccount': 'Correct title card account',
+      'correctBeginningAnimation': 'Correct beginning animation',
+      'correctEndingAnimation': 'Correct ending animation',
+      'correctBackgroundFootage': 'Correct background footage',
+      'audioQuality': 'Audio quality is clear',
+      'videoQuality': 'Video quality is acceptable'
+    },
+    2: {
+      'correctFont': 'Correct Font',
+      'correctCaptionAnimation': 'Correct caption animation',
+      'correctEndingAnimation2': 'Correct ending animation',
+      'correctBackgroundFootage2': 'Correct background footage',
+      'textReadability': 'Text is readable and clear',
+      'overallQuality': 'Overall video meets standards'
+    }
+  };
+  
+  return labels[step]?.[key] || key;
+}
