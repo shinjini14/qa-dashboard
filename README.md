@@ -138,6 +138,25 @@ A sleek, modern web application for managing video content quality assurance wor
    - Implement rate limiting
    - Regular security updates
 
+## 🔧 API Endpoints
+
+### Authentication
+- `POST /api/auth/login` - User login
+- `POST /api/auth/logout` - User logout
+- `GET /api/auth/me` - Get current user
+- `POST /api/auth/init-db` - Initialize database
+
+### QA Management
+- `GET /api/accounts` - Get active accounts
+- `GET /api/qa/next` - Get next QA task
+- `POST /api/qa/submit-step` - Submit step results (auto-saves progress)
+- `POST /api/qa/complete` - Complete QA task and send notifications
+- `GET /api/qa/download-report` - Download comprehensive QA report
+- `POST /api/qa/seed-tasks` - Seed QA tasks (dev only)
+
+### Notifications
+- `POST /api/notifications/discord` - Send Discord notification
+- `POST /api/notifications/trello` - Create/update Trello card
 
 ## 🎯 Customization
 
