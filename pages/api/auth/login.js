@@ -23,17 +23,23 @@ export default async function handler(req, res) {
       // Set HTTP-only cookie with production-friendly settings
       const isProduction = process.env.NODE_ENV === 'production';
 
-      // More lenient cookie settings for production
-      let cookieValue = `auth-token=${result.token}; HttpOnly; Path=/; Max-Age=86400`;
+      // Use multiple cookie setting approaches for better compatibility
+      const cookieOptions = [
+        `auth-token=${result.token}`,
+        'HttpOnly',
+        'Path=/',
+        'Max-Age=86400'
+      ];
 
       if (isProduction) {
-        // For production, use SameSite=Lax which is more compatible
-        cookieValue += '; SameSite=Lax; Secure';
+        // For production, use SameSite=None for better cross-origin compatibility
+        cookieOptions.push('SameSite=None', 'Secure');
       } else {
-        // For development
-        cookieValue += '; SameSite=Strict';
+        // For development, use Lax for better compatibility
+        cookieOptions.push('SameSite=Lax');
       }
 
+      const cookieValue = cookieOptions.join('; ');
       res.setHeader('Set-Cookie', cookieValue);
       console.log('[Login] Cookie set with options:', cookieValue);
 

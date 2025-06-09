@@ -42,11 +42,18 @@ export default function Login() {
 
   const checkAuthStatus = async () => {
     try {
+      console.log('[Login] Checking auth status...');
       const response = await axios.get('/api/auth/me');
+      console.log('[Login] Auth check response:', response.data);
+
       if (response.data.success) {
+        console.log('[Login] User already authenticated, redirecting...');
         router.push('/');
+      } else {
+        console.log('[Login] User not authenticated, staying on login page');
       }
     } catch (error) {
+      console.log('[Login] Auth check failed:', error.response?.data || error.message);
       // User not authenticated, stay on login page
     }
   };
@@ -65,15 +72,27 @@ export default function Login() {
     setLoading(true);
     setError('');
 
+    console.log('[Login] Submitting login form with:', { username: formData.username });
+
     try {
       const response = await axios.post('/api/auth/login', formData);
-      
+      console.log('[Login] Login response:', response.data);
+
       if (response.data.success) {
-        router.push('/');
+        console.log('[Login] Login successful, redirecting to home...');
+
+        // Wait a moment for cookie to be set, then force a page reload to ensure cookie is recognized
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 200);
+      } else {
+        console.log('[Login] Login failed:', response.data.message);
+        setError(response.data.message || 'Login failed');
       }
     } catch (error) {
+      console.error('[Login] Login error:', error);
       setError(
-        error.response?.data?.message || 
+        error.response?.data?.message ||
         'Login failed. Please check your credentials.'
       );
     } finally {
