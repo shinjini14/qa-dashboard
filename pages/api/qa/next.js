@@ -17,7 +17,7 @@ function toEmbedUrl(watchUrl) {
 }
 
 export default async function handler(req, res) {
-  const accountId = parseInt(req.query.account, 10);
+  const accountId = parseInt(req.query.account, 50);
   const driveUrl  = req.query.drive;
 
   console.log('[/api/qa/next] received:', { accountId, driveUrl });
