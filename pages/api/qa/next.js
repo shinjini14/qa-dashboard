@@ -17,7 +17,9 @@ function toEmbedUrl(watchUrl) {
 }
 
 export default async function handler(req, res) {
-  const accountId = parseInt(req.query.account, 50);
+  // Parse account ID properly
+  const accountParam = req.query.account;
+  const accountId = accountParam ? parseInt(accountParam, 10) : null;
   let driveUrl = req.query.drive;
 
   // Decode URL if it's encoded
@@ -29,18 +31,27 @@ export default async function handler(req, res) {
     }
   }
 
-  console.log('[/api/qa/next] received:', { accountId, driveUrl, originalDrive: req.query.drive });
+  console.log('[/api/qa/next] received:', {
+    accountParam,
+    accountId,
+    driveUrl,
+    originalDrive: req.query.drive
+  });
 
-  if (!accountId || !driveUrl) {
+  // Validate parameters
+  if (!accountId || isNaN(accountId) || accountId <= 0 || !driveUrl) {
     return res.status(400).json({
       success: false,
       message: 'Please select both a Drive video and an account',
       debug: {
+        accountParam,
         accountId,
         driveUrl,
         originalDrive: req.query.drive,
-        hasAccountId: !!accountId,
-        hasDriveUrl: !!driveUrl
+        accountIdValid: !!(accountId && !isNaN(accountId) && accountId > 0),
+        driveUrlValid: !!driveUrl,
+        accountIdType: typeof accountId,
+        driveUrlType: typeof driveUrl
       }
     });
   }

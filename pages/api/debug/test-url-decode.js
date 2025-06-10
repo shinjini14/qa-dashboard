@@ -1,7 +1,8 @@
 // pages/api/debug/test-url-decode.js
 
 export default async function handler(req, res) {
-  const accountId = parseInt(req.query.account, 10);
+  const accountParam = req.query.account;
+  const accountId = accountParam ? parseInt(accountParam, 10) : null;
   let driveUrl = req.query.drive;
   const originalDrive = req.query.drive;
 
@@ -17,6 +18,7 @@ export default async function handler(req, res) {
   res.json({
     success: true,
     data: {
+      accountParam,
       accountId,
       originalDrive,
       decodedDrive: driveUrl,
@@ -25,9 +27,10 @@ export default async function handler(req, res) {
       accountIdType: typeof accountId,
       driveUrlType: typeof driveUrl,
       validation: {
-        accountIdValid: !isNaN(accountId) && accountId > 0,
+        accountIdValid: !!(accountId && !isNaN(accountId) && accountId > 0),
         driveUrlValid: !!driveUrl && driveUrl.length > 0,
-        bothValid: (!isNaN(accountId) && accountId > 0) && (!!driveUrl && driveUrl.length > 0)
+        bothValid: (!!(accountId && !isNaN(accountId) && accountId > 0)) && (!!driveUrl && driveUrl.length > 0),
+        wouldPassValidation: (!accountId || isNaN(accountId) || accountId <= 0 || !driveUrl) ? false : true
       }
     }
   });
