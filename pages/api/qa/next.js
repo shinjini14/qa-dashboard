@@ -55,7 +55,7 @@ export default async function handler(req, res) {
 
       // 1. Get account info
       const { rows: accountRows } = await client.query(
-        `SELECT account FROM posting_accounts WHERE id = $1 AND status = 'active'`,
+        `SELECT account FROM posting_accounts WHERE id = $1 AND status = 'Active'`,
         [accountId]
       );
 
