@@ -18,14 +18,30 @@ function toEmbedUrl(watchUrl) {
 
 export default async function handler(req, res) {
   const accountId = parseInt(req.query.account, 50);
-  const driveUrl  = req.query.drive;
+  let driveUrl = req.query.drive;
 
-  console.log('[/api/qa/next] received:', { accountId, driveUrl });
+  // Decode URL if it's encoded
+  if (driveUrl) {
+    try {
+      driveUrl = decodeURIComponent(driveUrl);
+    } catch (e) {
+      console.log('[/api/qa/next] URL decode error (using original):', e.message);
+    }
+  }
+
+  console.log('[/api/qa/next] received:', { accountId, driveUrl, originalDrive: req.query.drive });
 
   if (!accountId || !driveUrl) {
     return res.status(400).json({
       success: false,
-      message: 'Please select both a Drive video and an account'
+      message: 'Please select both a Drive video and an account',
+      debug: {
+        accountId,
+        driveUrl,
+        originalDrive: req.query.drive,
+        hasAccountId: !!accountId,
+        hasDriveUrl: !!driveUrl
+      }
     });
   }
 
@@ -53,21 +69,35 @@ export default async function handler(req, res) {
     } else {
       // Create new QA task
 
-      // 1. Get account info
+      // 1. Get account info - be more flexible with status checking
       const { rows: accountRows } = await client.query(
-        `SELECT account FROM posting_accounts WHERE id = $1 AND status = 'Active'`,
+        `SELECT account, status FROM posting_accounts WHERE id = $1`,
         [accountId]
       );
 
       if (accountRows.length === 0) {
         await client.query('ROLLBACK');
+        console.log(`[/api/qa/next] Account ${accountId} not found in posting_accounts table`);
         return res.status(400).json({
           success: false,
-          message: 'Invalid or inactive account selected'
+          message: `Account ID ${accountId} not found`
         });
       }
 
-      const accountName = accountRows[0].account;
+      const account = accountRows[0];
+
+      // Check if account is inactive (only reject if explicitly inactive)
+      if (account.status === 'inactive' || account.status === 'disabled' || account.status === 'Inactive' ) {
+        await client.query('ROLLBACK');
+        console.log(`[/api/qa/next] Account ${accountId} is ${account.status}`);
+        return res.status(400).json({
+          success: false,
+          message: `Account is ${account.status}`
+        });
+      }
+
+      const accountName = account.account;
+      console.log(`[/api/qa/next] Using account: ${accountName} (ID: ${accountId}, Status: ${account.status || 'null'})`);
 
       // Get reference video for storage (even though frontend uses localStorage)
       const { rows: refRows } = await client.query(
