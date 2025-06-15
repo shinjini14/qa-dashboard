@@ -1,5 +1,5 @@
 // components/FrameQA.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box, Card, Typography, Grid,
   FormGroup, FormControlLabel,
@@ -10,22 +10,9 @@ import {
   CheckCircle, RadioButtonUnchecked,
   ArrowForward, VideoLibrary,
   Description, OpenInNew,
-  Assignment, Preview, ArrowBack,
-  NavigateBefore, NavigateNext
+  Assignment, Preview, ArrowBack
 } from '@mui/icons-material';
 import axios from 'axios';
-
-// turn any YouTube watch/shorts URL into an embed-friendly URL
-function toEmbedUrl(watchUrl) {
-  try {
-    const m = watchUrl.match(/(?:youtu\.be\/|v=|shorts\/)([^?&/]+)/);
-    if (m && m[1]) {
-      const id = m[1];
-      return `https://www.youtube.com/embed/${id}`;
-    }
-  } catch {}
-  return watchUrl;
-}
 
 // Convert Google Drive share URL to different formats for video playback
 function convertDriveUrl(driveUrl) {

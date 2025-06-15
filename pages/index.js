@@ -76,9 +76,9 @@ export default function Home() {
       setStep2Results({ checks, comments });
       setPage('qa-step-3');
     } else {
-      // Step 3: Store the checklist in step3Results and comments as finalNotes
+      // Step 3: Store the checklist in step3Results and initialize final notes with Step 3 comments
       setStep3Results({ checks, comments });
-      setFinalNotes(comments || ''); // Set the Step 3 comments as final notes
+      setFinalNotes(comments || ''); // Initialize final notes with Step 3 comments (user can edit)
       setPage('qa-report');
     }
   };

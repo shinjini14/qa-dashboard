@@ -118,13 +118,58 @@ STEP 2 RESULTS
     report += `\nNo Step 2 results available.\n`;
   }
 
+  report += `\n==========================================
+STEP 3 RESULTS
+==========================================
+`;
+
+  if (task.step3_results) {
+    const step3 = task.step3_results;
+
+    if (step3.checks) {
+      report += `\nChecklist Items:\n`;
+      Object.entries(step3.checks).forEach(([key, checked]) => {
+        const label = getChecklistLabel(key, 3);
+        report += `  ${checked ? '✅' : '❌'} ${label}\n`;
+      });
+
+      const completedCount = Object.values(step3.checks).filter(Boolean).length;
+      const totalCount = Object.keys(step3.checks).length;
+      report += `\nStep 3 Progress: ${completedCount}/${totalCount} items completed\n`;
+    }
+
+    if (step3.comments) {
+      report += `\nStep 3 Comments:\n${step3.comments}\n`;
+    }
+  } else {
+    report += `\nNo Step 3 results available.\n`;
+  }
+
   if (task.final_notes) {
     report += `\n==========================================
 FINAL NOTES
 ==========================================
 
-${task.final_notes}
 `;
+
+    // Handle both old TEXT format and new JSONB format
+    if (typeof task.final_notes === 'string') {
+      // Old TEXT format
+      report += task.final_notes;
+    } else if (typeof task.final_notes === 'object') {
+      // New JSONB format
+      if (task.final_notes.comments) {
+        report += task.final_notes.comments;
+      }
+      if (task.final_notes.completed_at) {
+        report += `\n\nCompleted At: ${task.final_notes.completed_at}`;
+      }
+      if (task.final_notes.completed_by) {
+        report += `\nCompleted By: ${task.final_notes.completed_by}`;
+      }
+    }
+
+    report += `\n`;
   }
 
   report += `\n==========================================
@@ -150,6 +195,12 @@ Overall Status: ${task.status}
     completedItems += step2Checks.filter(Boolean).length;
   }
 
+  if (task.step3_results?.checks) {
+    const step3Checks = Object.values(task.step3_results.checks);
+    totalItems += step3Checks.length;
+    completedItems += step3Checks.filter(Boolean).length;
+  }
+
   if (totalItems > 0) {
     const percentage = Math.round((completedItems / totalItems) * 100);
     report += `Overall Completion: ${completedItems}/${totalItems} items (${percentage}%)\n`;
@@ -173,12 +224,28 @@ function getChecklistLabel(key, step) {
       'videoQuality': 'Video quality is acceptable'
     },
     2: {
-      'correctFont': 'Correct Font',
-      'correctCaptionAnimation': 'Correct caption animation',
-      'correctEndingAnimation2': 'Correct ending animation',
-      'correctBackgroundFootage2': 'Correct background footage',
-      'textReadability': 'Text is readable and clear',
-      'overallQuality': 'Overall video meets standards'
+      'captionFont27': 'Font 27 - BalloonFont-Regular.otf',
+      'captionFontSize160': 'Font size 160',
+      'captionStroke14': 'Stroke 14 outer',
+      'captionBumpAnimation': 'Bump Animation 1 .prfpset',
+      'titleCardDownload': 'Download title card',
+      'titleCardPlacementMiddle': 'Title card placement Middle',
+      'titleCardPreset': 'Title card preset',
+      'startAnimationPopIn': 'Start animation pop in',
+      'endAnimationZoomOut': 'End animation Zoom out',
+      'lastSentenceYellow': 'Last sentence yellow',
+      'redArrowCapcut': 'Red arrow added'
+    },
+    3: {
+      'backgroundAiSatisfying': 'AI Satisfying background',
+      'backgroundOddlySatisfying': 'Oddly Satisfying background',
+      'backgroundClip1': 'Clip 1 - AI Satisfying',
+      'backgroundClip2': 'Clip 2 - Oddly',
+      'backgroundClip3': 'Clip 3 - AI Satisfying',
+      'backgroundClip4': 'Clip 4 - Oddly',
+      'backgroundClip5': 'Clip 5 - AI Satisfying',
+      'backgroundRestOddly': 'Rest clips Oddly Satisfying',
+      'backgroundMusicAdded': 'Background music added'
     }
   };
   

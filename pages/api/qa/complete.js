@@ -40,7 +40,13 @@ export default async function handler(req, res) {
 
     const task = taskQuery.rows[0];
 
-    // Update QA task to completed status
+    // Update QA task to completed status with JSONB final_notes
+    const finalNotesJsonb = {
+      comments: final_notes || '',
+      completed_at: new Date().toISOString(),
+      completed_by: 'qa_reviewer' // You can add user info here if available
+    };
+
     const updateResult = await client.query(
       `UPDATE qa_tasks
        SET status = 'completed',
@@ -48,7 +54,7 @@ export default async function handler(req, res) {
            updated_at = NOW()
        WHERE id = $1
        RETURNING final_notes`,
-      [qa_task_id, final_notes || '']
+      [qa_task_id, JSON.stringify(finalNotesJsonb)]
     );
 
     console.log('[QA Complete] Updated final_notes in DB:', updateResult.rows[0]?.final_notes);
@@ -63,6 +69,7 @@ export default async function handler(req, res) {
       referenceUrl: task.reference_url,
       step1Results: task.step1_results,
       step2Results: task.step2_results,
+      step3Results: task.step3_results,
       finalNotes: final_notes,
       status: 'completed'
     };

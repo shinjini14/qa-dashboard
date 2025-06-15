@@ -26,13 +26,13 @@ export default async function handler(req, res) {
         [qa_task_id, checks, comments || '']
       );
     } else if (frame === 3) {
-      // Step 3: Save to final_notes (since there's no step3_results column)
+      // Step 3: Save to step3_results (now that we have the column)
       await pool.query(
         `UPDATE qa_tasks
-           SET final_notes = $2,
+           SET step3_results = jsonb_build_object('checks', to_jsonb($2::jsonb), 'comments', $3::text),
                updated_at = NOW()
          WHERE id = $1`,
-        [qa_task_id, comments || '']
+        [qa_task_id, checks, comments || '']
       );
     }
 
