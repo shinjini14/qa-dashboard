@@ -138,16 +138,7 @@ export default function DriveLinksManager({ showWelcomeMessage = true }) {
     }
   };
 
-  const debugDatabase = async () => {
-    try {
-      const response = await axios.get('/api/debug-drive-links');
-      console.log('[DriveLinksManager] Debug info:', response.data);
-      alert(`Database Debug Info:\n\nTotal Records: ${response.data.totalRecords}\nSpecific Record Found: ${response.data.specificRecord.length > 0 ? 'YES' : 'NO'}\n\nCheck console for full details.`);
-    } catch (err) {
-      console.error('[DriveLinksManager] Debug error:', err);
-      alert('Debug failed - check console');
-    }
-  };
+
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -242,13 +233,6 @@ export default function DriveLinksManager({ showWelcomeMessage = true }) {
             sx={{ minWidth: 120 }}
           >
             Add Link
-          </Button>
-          <Button
-            variant="outlined"
-            onClick={debugDatabase}
-            sx={{ minWidth: 100 }}
-          >
-            Debug DB
           </Button>
         </Box>
       </Card>
