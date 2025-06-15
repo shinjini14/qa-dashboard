@@ -11,8 +11,11 @@ import {
   Preview,
   DriveFileRenameOutline,
   VideoLibrary,
-  CheckCircle
+  CheckCircle,
+  Add,
+  Settings
 } from '@mui/icons-material';
+import { useRouter } from 'next/router';
 import axios from 'axios';
 
 // helper to turn any YouTube URL into an embed URL
@@ -34,6 +37,7 @@ export default function FrameWelcome({
   onStart,
   error
 }) {
+  const router = useRouter();
   const [driveLinks, setDriveLinks]       = useState([]);
   const [selectedDrive, setSelectedDrive] = useState('');
   const [reference, setReference]         = useState(null);
@@ -189,9 +193,29 @@ export default function FrameWelcome({
                     </Select>
                   </FormControl>
 
+                  {/* No Drive Links Alert */}
+                  {driveLinks.length === 0 && (
+                    <Alert
+                      severity="info"
+                      sx={{ mb: 3 }}
+                      action={
+                        <Button
+                          color="inherit"
+                          size="small"
+                          startIcon={<Add />}
+                          onClick={() => router.push('/admin')}
+                        >
+                          Add Links
+                        </Button>
+                      }
+                    >
+                      No drive links available for QA. Add some drive links to get started.
+                    </Alert>
+                  )}
+
                   {/* Action Buttons */}
                   <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6}>
+                    <Grid item xs={12} sm={4}>
                       <Button
                         component="a"
                         href={selectedDrive || '#'}
@@ -210,7 +234,25 @@ export default function FrameWelcome({
                         {selectedDrive ? 'Open Selected Video' : 'Select a Video'}
                       </Button>
                     </Grid>
-                    <Grid item xs={12} sm={6}>
+                    <Grid item xs={12} sm={4}>
+                      <Button
+                        variant="outlined"
+                        fullWidth
+                        startIcon={<Add />}
+                        onClick={() => router.push('/admin')}
+                        sx={{
+                          borderColor: 'rgba(48, 79, 254, 0.5)',
+                          color: '#304ffe',
+                          '&:hover': {
+                            borderColor: '#304ffe',
+                            backgroundColor: 'rgba(48, 79, 254, 0.1)'
+                          }
+                        }}
+                      >
+                        Add Drive Links
+                      </Button>
+                    </Grid>
+                    <Grid item xs={12} sm={4}>
                       <Button
                         variant="contained"
                         fullWidth

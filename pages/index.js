@@ -20,6 +20,7 @@ export default function Home() {
   const [currentTask, setCurrentTask]   = useState(null);
   const [step1Results, setStep1Results] = useState({ checks: {}, comments: '' });
   const [step2Results, setStep2Results] = useState({ checks: {}, comments: '' });
+  const [step3Results, setStep3Results] = useState({ checks: {}, comments: '' });
   const [finalNotes, setFinalNotes]     = useState('');
 
   const [loading, setLoading] = useState(false);
@@ -56,6 +57,7 @@ export default function Home() {
           setCurrentTask(r.data.task);
           setStep1Results({ checks: {}, comments: '' });
           setStep2Results({ checks: {}, comments: '' });
+          setStep3Results({ checks: {}, comments: '' });
           setFinalNotes('');
           setPage('qa-step-1');
         } else {
@@ -70,9 +72,22 @@ export default function Home() {
     if (step === 1) {
       setStep1Results({ checks, comments });
       setPage('qa-step-2');
-    } else {
+    } else if (step === 2) {
       setStep2Results({ checks, comments });
+      setPage('qa-step-3');
+    } else {
+      // Step 3: Store the checklist in step3Results and comments as finalNotes
+      setStep3Results({ checks, comments });
+      setFinalNotes(comments || ''); // Set the Step 3 comments as final notes
       setPage('qa-report');
+    }
+  };
+
+  const goToPreviousStep = (currentStep) => {
+    if (currentStep === 2) {
+      setPage('qa-step-1');
+    } else if (currentStep === 3) {
+      setPage('qa-step-2');
     }
   };
 
@@ -137,6 +152,7 @@ export default function Home() {
             step={1}
             task={currentTask}
             onNext={(checks, comments) => finishStep(1, checks, comments)}
+            onPrevious={() => goToPreviousStep(1)}
           />
         )}
 
@@ -145,6 +161,16 @@ export default function Home() {
             step={2}
             task={currentTask}
             onNext={(checks, comments) => finishStep(2, checks, comments)}
+            onPrevious={() => goToPreviousStep(2)}
+          />
+        )}
+
+        {page === 'qa-step-3' && currentTask && (
+          <FrameQA
+            step={3}
+            task={currentTask}
+            onNext={(checks, comments) => finishStep(3, checks, comments)}
+            onPrevious={() => goToPreviousStep(3)}
           />
         )}
 
@@ -153,6 +179,7 @@ export default function Home() {
             task={currentTask}
             step1Results={step1Results}
             step2Results={step2Results}
+            step3Results={step3Results}
             finalNotes={finalNotes}
             onFinalNotesChange={setFinalNotes}
             onSubmit={submitFinal}

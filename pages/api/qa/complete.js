@@ -8,6 +8,8 @@ export default async function handler(req, res) {
 
   const { qa_task_id, final_notes } = req.body;
 
+  console.log('[QA Complete] Received:', { qa_task_id, final_notes_length: final_notes?.length || 0, final_notes });
+
   if (!qa_task_id) {
     return res.status(400).json({
       success: false,
@@ -39,14 +41,17 @@ export default async function handler(req, res) {
     const task = taskQuery.rows[0];
 
     // Update QA task to completed status
-    await client.query(
+    const updateResult = await client.query(
       `UPDATE qa_tasks
        SET status = 'completed',
            final_notes = $2,
            updated_at = NOW()
-       WHERE id = $1`,
+       WHERE id = $1
+       RETURNING final_notes`,
       [qa_task_id, final_notes || '']
     );
+
+    console.log('[QA Complete] Updated final_notes in DB:', updateResult.rows[0]?.final_notes);
 
     await client.query('COMMIT');
 

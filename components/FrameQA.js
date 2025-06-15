@@ -10,7 +10,8 @@ import {
   CheckCircle, RadioButtonUnchecked,
   ArrowForward, VideoLibrary,
   Description, OpenInNew,
-  Assignment, Preview
+  Assignment, Preview, ArrowBack,
+  NavigateBefore, NavigateNext
 } from '@mui/icons-material';
 import axios from 'axios';
 
@@ -46,24 +47,78 @@ function convertDriveUrl(driveUrl) {
   return { original: driveUrl };
 }
 
-export default function FrameQA({ step, task, onNext }) {
-  // QA checklist templates
+export default function FrameQA({ step, task, onNext, onPrevious }) {
+  const [qaConfig, setQaConfig] = useState({});
+
+  // Load QA configuration from environment variables
+  useEffect(() => {
+    const loadQaConfig = async () => {
+      try {
+        const response = await axios.get('/api/qa-config');
+        if (response.data.success) {
+          setQaConfig(response.data.config);
+          console.log('[FrameQA] Loaded QA config:', response.data.config);
+        }
+      } catch (error) {
+        console.error('[FrameQA] Failed to load QA config:', error);
+      }
+    };
+    loadQaConfig();
+  }, []);
+
+  // QA checklist templates - REQUESTEDREADS YT SHORT FORM PROCESS (3 Steps)
   const templates = {
     1: [
-      { key:'correctTitleCardAccount',   label:'Correct title card account' },
-      { key:'correctBeginningAnimation', label:'Correct beginning animation' },
-      { key:'correctEndingAnimation',    label:'Correct ending animation' },
-      { key:'correctBackgroundFootage',  label:'Correct background footage' },
-      { key:'audioQuality',              label:'Audio quality is clear' },
-      { key:'videoQuality',              label:'Video quality is acceptable' },
+      // Audio generation using elevenlabs
+      { key:'audioMaleAntoni',           label:'✓ Male Antoni', group: 'Audio generation using elevenlabs' },
+      { key:'audioFemaleNatasha',        label:'✓ Female Natasha Valley Girl', group: 'Audio generation using elevenlabs' },
+
+      // Elevenlabs Settings
+      { key:'elevenSpeed12x',            label:'✓ 1.2x Speed', group: 'Elevenlabs Settings' },
+      { key:'elevenStability100',        label:'✓ 100% Stability', group: 'Elevenlabs Settings' },
+      { key:'elevenSimilarity80',        label:'✓ 80% Similarity', group: 'Elevenlabs Settings' },
+
+      // Audacity Settings
+      { key:'audacityThreshold30',       label:'✓ Threshold -30', group: 'Audacity Settings' },
+      { key:'audacityDuration01',        label:'✓ Duration 0.1', group: 'Audacity Settings' },
+      { key:'audacityTruncated01',       label:'✓ Truncated 0.1', group: 'Audacity Settings' },
+
+      // Adobe Speed Settings
+      { key:'adobeSpeed110',             label:'✓ 110%', group: 'Adobe Speed Settings' },
     ],
     2: [
-      { key:'correctFont',               label:'Correct Font' },
-      { key:'correctCaptionAnimation',   label:'Correct caption animation' },
-      { key:'correctEndingAnimation2',   label:'Correct ending animation' },
-      { key:'correctBackgroundFootage2', label:'Correct background footage' },
-      { key:'textReadability',           label:'Text is readable and clear' },
-      { key:'overallQuality',            label:'Overall video meets standards' },
+      // Caption Text Preset and Caption Animation
+      { key:'captionFont27',             label:'✓ font 27 - BalloonFont-Regular.otf', group: 'Caption Text Preset and Caption Animation', link: qaConfig.balloonFontUrl },
+      { key:'captionFontSize160',        label:'✓ Font size 160', group: 'Caption Text Preset and Caption Animation' },
+      { key:'captionStroke14',           label:'✓ Stroke 14 outer', group: 'Caption Text Preset and Caption Animation' },
+      { key:'captionBumpAnimation',      label:'✓ Bump Animation 1 .prfpset', group: 'Caption Text Preset and Caption Animation', link: qaConfig.bumpAnimationUrl },
+
+      // Title Card Link and Title card preset
+      { key:'titleCardDownload',         label:'✓ Download the title card on this link extrajaamarketing', group: 'Title Card Link and Title card preset', link: qaConfig.titleCardDownloadUrl },
+      { key:'titleCardPlacementMiddle',  label:'✓ Title card placement Middle', group: 'Title Card Link and Title card preset' },
+      { key:'titleCardPreset',           label:'✓ Title card preset Title Preset.prfpset', group: 'Title Card Link and Title card preset', link: qaConfig.titleCardPresetUrl },
+      { key:'startAnimationPopIn',       label:'✓ Start animation pop in.prfpset', group: 'Title Card Link and Title card preset', link: qaConfig.startAnimationUrl },
+      { key:'endAnimationZoomOut',       label:'✓ End animation Zoom out .prfpset', group: 'Title Card Link and Title card preset', link: qaConfig.endAnimationUrl },
+
+      // This is only for short form Additional Process
+      { key:'lastSentenceYellow',        label:'✓ Last sentence should be yellow especially if the sentence is "Full story is linked below"', group: 'This is only for short form Additional Process' },
+      { key:'redArrowCapcut',            label:'✓ Add red arrow on it using capcut', group: 'This is only for short form Additional Process' },
+    ],
+    3: [
+      // Background For short and regular
+      { key:'backgroundAiSatisfying',    label:'✓ Ai Satisfying 📁 Ai videos With watermark*', group: 'Background For short and regular', link: qaConfig.aiSatisfyingFolderUrl },
+      { key:'backgroundOddlySatisfying', label:'✓ Oddly Satisfying 📁 [ ALL ]Oddly V3 2 secs', group: 'Background For short and regular', link: qaConfig.oddlySatisfyingFolderUrl },
+
+      // Background process
+      { key:'backgroundClip1',           label:'✓ Clip 1 - Ai Satisfying', group: 'Background process' },
+      { key:'backgroundClip2',           label:'✓ Clip 2 - Oddly', group: 'Background process' },
+      { key:'backgroundClip3',           label:'✓ Clip 3 - Ai Satisfying', group: 'Background process' },
+      { key:'backgroundClip4',           label:'✓ Clip 4 - Oddly', group: 'Background process' },
+      { key:'backgroundClip5',           label:'✓ Clip 5 - Ai Satisfying', group: 'Background process' },
+      { key:'backgroundRestOddly',       label:'✓ The rest of the clip should be Oddly Satisfying', group: 'Background process' },
+
+      // Add background music to it
+      { key:'backgroundMusicAdded',      label:'✓ Open this document to know the process 📄 How to add music to videos', group: 'Add background music to it', link: qaConfig.musicProcessDocUrl },
     ]
   };
 
@@ -190,11 +245,13 @@ export default function FrameQA({ step, task, onNext }) {
                 {refEmbed ? (
                   <Box sx={{
                     width:'100%',
-                    height:'calc(100vh - 300px)', // Use more of the viewport height
-                    minHeight: 400, // Minimum height
+                    height:'calc(100vh - 250px)', // Taller video container
+                    minHeight: 500, // Increased minimum height
+                    maxHeight: 800, // Maximum height to prevent too tall
                     borderRadius:2,
                     overflow:'hidden',
-                    border:'2px solid rgba(48,79,254,0.3)'
+                    border:'2px solid rgba(48,79,254,0.3)',
+                    position: 'relative'
                   }}>
                     <Box
                       component="iframe"
@@ -204,17 +261,28 @@ export default function FrameQA({ step, task, onNext }) {
                       height="100%"
                       sx={{
                         border:0,
-                        display: 'block' // Remove any default margins
+                        display: 'block',
+                        objectFit: 'cover' // Ensure video fills container
                       }}
                       allow="autoplay; encrypted-media"
                       allowFullScreen
+                    />
+                    <Chip
+                      label="Reference"
+                      size="small"
+                      sx={{
+                        position:'absolute', top:12, left:12,
+                        background:'linear-gradient(45deg,#304ffe,#7c4dff)',
+                        color:'white', fontWeight:600
+                      }}
                     />
                   </Box>
                 ) : (
                   <Box sx={{
                     width:'100%',
-                    height:'calc(100vh - 300px)', // Match video height
-                    minHeight: 400, // Minimum height
+                    height:'calc(100vh - 250px)', // Match video height
+                    minHeight: 500, // Increased minimum height
+                    maxHeight: 800, // Maximum height
                     border:'2px dashed rgba(255,255,255,0.2)',
                     borderRadius:2,
                     display:'flex', alignItems:'center', justifyContent:'center',
@@ -223,14 +291,16 @@ export default function FrameQA({ step, task, onNext }) {
                     <Preview sx={{ fontSize:48 }}/>
                   </Box>
                 )}
-                <Button
-                  startIcon={<OpenInNew />}
-                  sx={{ mt:2, textTransform:'none' }}
-                  onClick={()=>window.open(refUrl,'_blank')}
-                  disabled={!refUrl}
-                >
-                  Open Reference
-                </Button>
+                <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
+                  <Button
+                    startIcon={<OpenInNew />}
+                    sx={{ textTransform:'none', flex: 1 }}
+                    onClick={()=>window.open(refUrl,'_blank')}
+                    disabled={!refUrl}
+                  >
+                    Open Reference
+                  </Button>
+                </Box>
               </Card>
             </Slide>
           </Grid>
@@ -252,8 +322,9 @@ export default function FrameQA({ step, task, onNext }) {
                 {driveUrls?.preview ? (
                   <Box sx={{
                     width:'100%',
-                    height:'calc(100vh - 300px)', // Use more of the viewport height
-                    minHeight: 400, // Minimum height
+                    height:'calc(100vh - 250px)', // Taller video container
+                    minHeight: 500, // Increased minimum height
+                    maxHeight: 800, // Maximum height to prevent too tall
                     borderRadius:2,
                     overflow:'hidden',
                     position:'relative',
@@ -267,7 +338,8 @@ export default function FrameQA({ step, task, onNext }) {
                       height="100%"
                       sx={{
                         border:0,
-                        display: 'block' // Remove any default margins
+                        display: 'block',
+                        objectFit: 'cover' // Ensure video fills container
                       }}
                       allow="autoplay; encrypted-media"
                       allowFullScreen
@@ -311,8 +383,9 @@ export default function FrameQA({ step, task, onNext }) {
                 ) : (
                   <Box sx={{
                     width:'100%',
-                    height:'calc(100vh - 300px)', // Match video height
-                    minHeight: 400, // Minimum height
+                    height:'calc(100vh - 250px)', // Match video height
+                    minHeight: 500, // Increased minimum height
+                    maxHeight: 800, // Maximum height
                     border:'2px dashed rgba(255,255,255,0.2)',
                     borderRadius:2,
                     display:'flex', alignItems:'center', justifyContent:'center',
@@ -321,14 +394,16 @@ export default function FrameQA({ step, task, onNext }) {
                     <CloudDownload sx={{ fontSize:48 }}/>
                   </Box>
                 )}
-                <Button
-                  startIcon={<OpenInNew />}
-                  sx={{ mt:2, textTransform:'none' }}
-                  onClick={()=>window.open(task.drive_url,'_blank')}
-                  disabled={!task.drive_url}
-                >
-                  Open Drive Video
-                </Button>
+                <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
+                  <Button
+                    startIcon={<OpenInNew />}
+                    sx={{ textTransform:'none', flex: 1 }}
+                    onClick={()=>window.open(task.drive_url,'_blank')}
+                    disabled={!task.drive_url}
+                  >
+                    Open Drive Video
+                  </Button>
+                </Box>
               </Card>
             </Slide>
           </Grid>
@@ -344,32 +419,87 @@ export default function FrameQA({ step, task, onNext }) {
                 <Box sx={{ display:'flex', alignItems:'center', mb:3 }}>
                   <Assignment sx={{ fontSize:24, color:'#304ffe', mr:1 }}/>
                   <Typography variant="h6" fontWeight={600}>
-                    Quality Checklist
+                    {step === 1 ? 'Step 1: Audio & Speed Settings' :
+                     step === 2 ? 'Step 2: Captions & Title Cards' :
+                     'Step 3: Background & Music'}
                   </Typography>
                 </Box>
-                <FormGroup sx={{ mb:3 }}>
-                  {templates[step].map(item => (
-                    <FormControlLabel
-                      key={item.key}
-                      control={
-                        <Checkbox
-                          checked={checks[item.key]}
-                          onChange={()=>toggle(item.key)}
-                          icon={<RadioButtonUnchecked />}
-                          checkedIcon={<CheckCircle />}
-                          sx={{ color:'rgba(48,79,254,0.5)', '&.Mui-checked':{ color:'#4caf50' } }}
-                        />
-                      }
-                      label={<Typography sx={{fontWeight:checks[item.key]?600:400}}>
-                        {item.label}
-                      </Typography>}
-                      sx={{
-                        mb:1, p:1, borderRadius:1,
-                        '&:hover':{ backgroundColor:'rgba(48,79,254,0.05)' }
-                      }}
-                    />
-                  ))}
-                </FormGroup>
+                <Box sx={{ mb:3 }}>
+                  {(() => {
+                    // Group items by their group property
+                    const grouped = {};
+                    templates[step].forEach(item => {
+                      const group = item.group || 'General';
+                      if (!grouped[group]) grouped[group] = [];
+                      grouped[group].push(item);
+                    });
+
+                    return Object.entries(grouped).map(([groupName, items]) => (
+                      <Box key={groupName} sx={{ mb: 3 }}>
+                        <Typography
+                          variant="subtitle1"
+                          fontWeight={700}
+                          sx={{
+                            mb: 1.5,
+                            color: '#304ffe',
+                            borderBottom: '2px solid rgba(48,79,254,0.3)',
+                            pb: 0.5
+                          }}
+                        >
+                          {groupName}
+                        </Typography>
+                        <FormGroup>
+                          {items.map(item => (
+                            <FormControlLabel
+                              key={item.key}
+                              control={
+                                <Checkbox
+                                  checked={checks[item.key]}
+                                  onChange={()=>toggle(item.key)}
+                                  icon={<RadioButtonUnchecked />}
+                                  checkedIcon={<CheckCircle />}
+                                  sx={{ color:'rgba(48,79,254,0.5)', '&.Mui-checked':{ color:'#4caf50' } }}
+                                />
+                              }
+                              label={
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                  <Typography sx={{fontWeight:checks[item.key]?600:400}}>
+                                    {item.label}
+                                  </Typography>
+                                  {item.link && (
+                                    <Button
+                                      size="small"
+                                      variant="outlined"
+                                      onClick={() => window.open(item.link, '_blank')}
+                                      sx={{
+                                        minWidth: 'auto',
+                                        px: 1,
+                                        py: 0.25,
+                                        fontSize: '0.7rem',
+                                        borderColor: '#304ffe',
+                                        color: '#304ffe',
+                                        '&:hover': {
+                                          backgroundColor: 'rgba(48,79,254,0.1)',
+                                          borderColor: '#304ffe'
+                                        }
+                                      }}
+                                    >
+                                      Link
+                                    </Button>
+                                  )}
+                                </Box>
+                              }
+                              sx={{
+                                mb:0.5, p:1, borderRadius:1,
+                                '&:hover':{ backgroundColor:'rgba(48,79,254,0.05)' }
+                              }}
+                            />
+                          ))}
+                        </FormGroup>
+                      </Box>
+                    ));
+                  })()}
+                </Box>
                 <TextField
                   label="Additional Comments"
                   multiline rows={4} fullWidth variant="outlined"
@@ -400,6 +530,58 @@ export default function FrameQA({ step, task, onNext }) {
                   }}
                 />
                 <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column' }}>
+                  {/* Navigation buttons */}
+                  <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+                    {step > 1 && (
+                      <Button
+                        variant="outlined"
+                        startIcon={<ArrowBack />}
+                        onClick={() => onPrevious && onPrevious()}
+                        sx={{
+                          flex: 1,
+                          py: 1,
+                          borderRadius: 1,
+                          fontWeight: 600,
+                          borderColor: 'rgba(48,79,254,0.5)',
+                          color: '#304ffe',
+                          '&:hover': {
+                            borderColor: '#304ffe',
+                            backgroundColor: 'rgba(48,79,254,0.1)'
+                          }
+                        }}
+                      >
+                        Back to Step {step - 1}
+                      </Button>
+                    )}
+
+                    {/* Step indicator */}
+                    <Box sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 0.5,
+                      px: 2,
+                      py: 1,
+                      borderRadius: 1,
+                      backgroundColor: 'rgba(48,79,254,0.1)',
+                      border: '1px solid rgba(48,79,254,0.3)'
+                    }}>
+                      {[1, 2, 3].map((stepNum) => (
+                        <Box
+                          key={stepNum}
+                          sx={{
+                            width: 8,
+                            height: 8,
+                            borderRadius: '50%',
+                            backgroundColor: stepNum === step ? '#304ffe' :
+                                           stepNum < step ? '#4caf50' : 'rgba(255,255,255,0.3)',
+                            transition: 'all 0.3s ease'
+                          }}
+                        />
+                      ))}
+                    </Box>
+                  </Box>
+
+                  {/* Main action button */}
                   <Button
                     variant="contained"
                     fullWidth
@@ -411,7 +593,9 @@ export default function FrameQA({ step, task, onNext }) {
                       '&:hover':{ background:'linear-gradient(45deg,#1e3aff,#6c3dff)' }
                     }}
                   >
-                    {step===1? 'Continue to Step 2' : 'Complete Review'}
+                    {step === 1 ? 'Continue to Step 2: Captions & Title Cards' :
+                     step === 2 ? 'Continue to Step 3: Background & Music' :
+                     'Complete REQUESTEDREADS YT SHORT FORM Review'}
                   </Button>
                 </Box>
               </Card>

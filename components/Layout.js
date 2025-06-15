@@ -16,12 +16,16 @@ import {
   Logout,
   Person,
   Dashboard,
-  Assessment
+  Assessment,
+  Add,
+  Link as LinkIcon
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
+import { useRouter } from 'next/router';
 
 export default function Layout({ children }) {
   const { user, logout } = useAuth();
+  const router = useRouter();
   const [anchorEl, setAnchorEl] = React.useState(null);
 
   const handleMenuOpen = (event) => {
@@ -35,6 +39,14 @@ export default function Layout({ children }) {
   const handleLogout = () => {
     handleMenuClose();
     logout();
+  };
+
+  const handleAddDriveLinks = () => {
+    router.push('/admin'); // Navigate to admin page for drive links
+  };
+
+  const handleGoToQA = () => {
+    router.push('/'); // Navigate back to main QA dashboard
   };
 
   return (
@@ -80,19 +92,52 @@ export default function Layout({ children }) {
           </Box>
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            {/* Add Drive Links Button */}
+            <Button
+              startIcon={<Add />}
+              onClick={handleAddDriveLinks}
+              sx={{
+                textTransform: 'none',
+                fontWeight: 600,
+                color: '#304ffe',
+                borderColor: 'rgba(48, 79, 254, 0.5)',
+                border: '1px solid',
+                borderRadius: 2,
+                px: 2,
+                py: 1,
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  borderColor: '#304ffe',
+                  backgroundColor: 'rgba(48, 79, 254, 0.1)',
+                  boxShadow: '0 4px 20px rgba(48, 79, 254, 0.2)'
+                }
+              }}
+            >
+              Add Drive Links
+            </Button>
+
             <Chip
               icon={<Assessment />}
               label="Quality Assurance"
               variant="outlined"
+              clickable
+              onClick={handleGoToQA}
               sx={{
                 borderColor: 'rgba(48, 79, 254, 0.5)',
                 color: '#304ffe',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
                 '& .MuiChip-icon': {
                   color: '#304ffe'
+                },
+                '&:hover': {
+                  borderColor: '#304ffe',
+                  backgroundColor: 'rgba(48, 79, 254, 0.1)',
+                  boxShadow: '0 4px 20px rgba(48, 79, 254, 0.2)'
                 }
               }}
             />
-            
+
             <IconButton
               onClick={handleMenuOpen}
               sx={{

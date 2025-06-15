@@ -33,7 +33,7 @@ function convertDriveUrlToEmbed(driveUrl) {
 }
 
 export default function FrameReport({
-  task, step1Results, step2Results, finalNotes,
+  task, step1Results, step2Results, step3Results, finalNotes,
   onFinalNotesChange, onSubmit
 }) {
   const mapLabels = (obj) =>
@@ -45,9 +45,10 @@ export default function FrameReport({
 
   const cols1 = mapLabels(step1Results);
   const cols2 = mapLabels(step2Results);
+  const cols3 = mapLabels(step3Results);
 
-  const totalChecks = cols1.length + cols2.length;
-  const passedChecks = [...cols1, ...cols2].filter(c => c.value).length;
+  const totalChecks = cols1.length + cols2.length + cols3.length;
+  const passedChecks = [...cols1, ...cols2, ...cols3].filter(c => c.value).length;
   const successRate = Math.round((passedChecks / totalChecks) * 100);
 
   return (
@@ -113,7 +114,7 @@ export default function FrameReport({
 
                 <Grid container spacing={3}>
                   {/* Step 1 Results */}
-                  <Grid item xs={12} md={6}>
+                  <Grid item xs={12} md={4}>
                     <Box
                       sx={{
                         p: 3,
@@ -123,7 +124,7 @@ export default function FrameReport({
                       }}
                     >
                       <Typography variant="h6" fontWeight={600} sx={{ mb: 2, color: '#304ffe' }}>
-                        Step 1 - Initial Review
+                        Step 1: Audio & Speed
                       </Typography>
                       <FormGroup>
                         {cols1.map(c => (
@@ -166,7 +167,7 @@ export default function FrameReport({
                   </Grid>
 
                   {/* Step 2 Results */}
-                  <Grid item xs={12} md={6}>
+                  <Grid item xs={12} md={4}>
                     <Box
                       sx={{
                         p: 3,
@@ -176,7 +177,7 @@ export default function FrameReport({
                       }}
                     >
                       <Typography variant="h6" fontWeight={600} sx={{ mb: 2, color: '#7c4dff' }}>
-                        Step 2 - Final Review
+                        Step 2: Captions & Title Cards
                       </Typography>
                       <FormGroup>
                         {cols2.map(c => (
@@ -217,6 +218,59 @@ export default function FrameReport({
                       )}
                     </Box>
                   </Grid>
+
+                  {/* Step 3 Results */}
+                  <Grid item xs={12} md={4}>
+                    <Box
+                      sx={{
+                        p: 3,
+                        borderRadius: 2,
+                        background: 'linear-gradient(135deg, #2a2a2a, #3a3a3a)',
+                        border: '1px solid rgba(48, 79, 254, 0.1)'
+                      }}
+                    >
+                      <Typography variant="h6" fontWeight={600} sx={{ mb: 2, color: '#ff9800' }}>
+                        Step 3: Background & Music
+                      </Typography>
+                      <FormGroup>
+                        {cols3.map(c => (
+                          <FormControlLabel
+                            key={c.key}
+                            control={
+                              <Checkbox
+                                checked={c.value}
+                                disabled
+                                icon={<Cancel sx={{ color: '#f44336' }} />}
+                                checkedIcon={<CheckCircle sx={{ color: '#4caf50' }} />}
+                              />
+                            }
+                            label={
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  color: c.value ? '#4caf50' : '#f44336',
+                                  fontWeight: c.value ? 600 : 400
+                                }}
+                              >
+                                {c.label}
+                              </Typography>
+                            }
+                            sx={{ mb: 1 }}
+                          />
+                        ))}
+                      </FormGroup>
+                      {step3Results.comments && (
+                        <Box sx={{ mt: 2, p: 2, borderRadius: 1, bgcolor: 'rgba(255, 152, 0, 0.05)' }}>
+                          <Typography variant="caption" color="text.secondary">
+                            Comments:
+                          </Typography>
+                          <Typography variant="body2" sx={{ mt: 0.5 }}>
+                            {step3Results.comments}
+                          </Typography>
+                        </Box>
+                      )}
+                    </Box>
+                  </Grid>
                 </Grid>
 
                 <Divider sx={{ my: 3, borderColor: 'rgba(48, 79, 254, 0.2)' }} />
@@ -230,7 +284,7 @@ export default function FrameReport({
                 </Box>
 
                 <TextField
-                  label="Final Notes"
+                  label="Final Notes & Step 3 Comments"
                   multiline
                   rows={4}
                   fullWidth
@@ -238,6 +292,7 @@ export default function FrameReport({
                   value={finalNotes}
                   onChange={e => onFinalNotesChange(e.target.value)}
                   placeholder="Add any final observations, recommendations, or notes about this QA review..."
+                  helperText="This includes your Step 3 comments and any additional final notes"
                   sx={{
                     mb: 3,
                     '& .MuiOutlinedInput-root': {

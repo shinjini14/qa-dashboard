@@ -1,14 +1,29 @@
 // pages/api/reference-preview.js
 import pool from './utils/db';   // ← fixed path
 
-// Helper: convert any YouTube watch or shorts URL into an embed URL
-function toEmbedUrl(watchUrl) {
-  const m = watchUrl.match(/(?:youtu\.be\/|v=|shorts\/)([^?&/]+)/);
-  if (m && m[1]) {
-    const id = m[1];
-    return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}`;
+// Helper: convert various video URLs to embed format
+function toEmbedUrl(url) {
+  if (!url) return null;
+
+  try {
+    // YouTube URLs (watch, shorts, youtu.be)
+    const youtubeMatch = url.match(/(?:youtu\.be\/|v=|shorts\/)([^?&/]+)/);
+    if (youtubeMatch && youtubeMatch[1]) {
+      const id = youtubeMatch[1];
+      return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}`;
+    }
+
+    // Google Drive URLs
+    const driveMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if (driveMatch && driveMatch[1]) {
+      return `https://drive.google.com/file/d/${driveMatch[1]}/preview`;
+    }
+
+    return url; // Return original if no conversion needed
+  } catch (e) {
+    console.error('Error converting URL to embed:', e);
+    return url;
   }
-  return watchUrl;
 }
 
 export default async function handler(req, res) {
@@ -20,40 +35,44 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Fetch account name for logging
-    const { rows: acctRows } = await pool.query(
-      `SELECT account 
-         FROM posting_accounts 
-        WHERE id = $1`,
+    // Get account name and reference URL from the new reference_url table
+    const { rows: accountRows } = await pool.query(
+      `SELECT
+         pa.account,
+         ru.url as reference_url
+       FROM posting_accounts pa
+       LEFT JOIN reference_url ru ON pa.account = ru.account_name
+       WHERE pa.id = $1`,
       [accountId]
     );
-    const accountName = acctRows.length ? acctRows[0].account : 'UNKNOWN';
-    console.log(`[/api/reference-preview] looking up for account name:`, accountName);
 
-    // 1) Try to find the latest *Shorts* video for that account
-    const { rows: shortRows } = await pool.query(
-      `SELECT v.url AS video_url
-         FROM video v
-        WHERE v.account_id = $1
-          AND v.url ILIKE '%shorts/%'
-        ORDER BY v.created DESC
-        LIMIT 1;`,
-      [accountId]
-    );
-    if (shortRows.length) {
-      const url = shortRows[0].video_url;
-      console.log(`[/api/reference-preview] selected SHORTS video_url:`, url);
+    if (accountRows.length === 0) {
+      console.log(`[/api/reference-preview] Account ${accountId} not found`);
+      return res.json({ success: true, preview: null });
+    }
+
+    const account = accountRows[0];
+    const accountName = account.account;
+    const referenceUrl = account.reference_url;
+
+    console.log(`[/api/reference-preview] Account: ${accountName}, Reference URL: ${referenceUrl}`);
+
+    if (referenceUrl) {
+      console.log(`[/api/reference-preview] Using reference URL from reference_url table:`, referenceUrl);
       return res.json({
         success: true,
         preview: {
-          video_url: url,
-          embed_url: toEmbedUrl(url)
+          video_url: referenceUrl,
+          embed_url: toEmbedUrl(referenceUrl)
         }
       });
     }
 
-    // 2) Fallback: pick the most recent non-shorts video
-    const { rows: fullRows } = await pool.query(
+    // Fallback: if no reference URL in the table, try the old method
+    console.log(`[/api/reference-preview] No reference URL found for ${accountName}, trying fallback...`);
+
+    // Try to find the latest video from the video table as fallback
+    const { rows: fallbackRows } = await pool.query(
       `SELECT v.url AS video_url
          FROM video v
         WHERE v.account_id = $1
@@ -62,9 +81,10 @@ export default async function handler(req, res) {
         LIMIT 1;`,
       [accountId]
     );
-    if (fullRows.length) {
-      const url = fullRows[0].video_url;
-      console.log(`[/api/reference-preview] selected FULL video_url:`, url);
+
+    if (fallbackRows.length) {
+      const url = fallbackRows[0].video_url;
+      console.log(`[/api/reference-preview] Using fallback video:`, url);
       return res.json({
         success: true,
         preview: {
@@ -74,8 +94,8 @@ export default async function handler(req, res) {
       });
     }
 
-    // 3) Nothing at all
-    console.log('[/api/reference-preview] no videos found for account.');
+    // No reference video found at all
+    console.log('[/api/reference-preview] No reference video found for account.');
     return res.json({ success: true, preview: null });
   } catch (err) {
     console.error('[/api/reference-preview] error', err);

@@ -110,36 +110,18 @@ export default async function handler(req, res) {
       const accountName = account.account;
       console.log(`[/api/qa/next] Using account: ${accountName} (ID: ${accountId}, Status: ${account.status || 'null'})`);
 
-      // Get reference video for storage (even though frontend uses localStorage)
+      // Get reference video from reference_url table based on account name
       const { rows: refRows } = await client.query(
-        `SELECT v.url AS video_url
-           FROM video v
-          WHERE v.account_id = $1
-            AND v.url IS NOT NULL
-            AND v.url ILIKE '%shorts/%'
-          ORDER BY v.created DESC
-          LIMIT 1`,
-        [accountId]
+        `SELECT url FROM reference_url WHERE account_name = $1 LIMIT 1`,
+        [accountName]
       );
 
       if (refRows.length > 0) {
-        referenceUrl = refRows[0].video_url;
+        referenceUrl = refRows[0].url;
+        console.log(`[/api/qa/next] Found reference URL for ${accountName}:`, referenceUrl);
       } else {
-        // Fallback to regular videos
-        const { rows: fallbackRows } = await client.query(
-          `SELECT v.url AS video_url
-             FROM video v
-            WHERE v.account_id = $1
-              AND v.url IS NOT NULL
-            ORDER BY v.created DESC
-            LIMIT 1`,
-          [accountId]
-        );
-        if (fallbackRows.length > 0) {
-          referenceUrl = fallbackRows[0].video_url;
-        } else {
-          referenceUrl = null;
-        }
+        referenceUrl = null;
+        console.log(`[/api/qa/next] No reference URL found for account: ${accountName}`);
       }
 
       // 3. Create QA task (using the actual schema columns)
