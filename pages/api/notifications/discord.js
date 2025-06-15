@@ -6,15 +6,16 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { 
-    qaTaskId, 
-    accountName, 
-    driveUrl, 
-    referenceUrl, 
-    step1Results, 
-    step2Results, 
+  const {
+    qaTaskId,
+    accountName,
+    driveUrl,
+    referenceUrl,
+    step1Results,
+    step2Results,
+    step3Results,
     finalNotes,
-    status 
+    status
   } = req.body;
 
   // Discord bot token and channel ID - add these to your .env file
@@ -69,10 +70,22 @@ export default async function handler(req, res) {
       const step2Checks = step2Results.checks || {};
       const step2Count = Object.values(step2Checks).filter(Boolean).length;
       const step2Total = Object.keys(step2Checks).length;
-      
+
       embed.fields.push({
         name: '✅ Step 2 Progress',
         value: `${step2Count}/${step2Total} items completed`,
+        inline: true
+      });
+    }
+
+    if (step3Results) {
+      const step3Checks = step3Results.checks || {};
+      const step3Count = Object.values(step3Checks).filter(Boolean).length;
+      const step3Total = Object.keys(step3Checks).length;
+
+      embed.fields.push({
+        name: '✅ Step 3 Progress',
+        value: `${step3Count}/${step3Total} items completed`,
         inline: true
       });
     }
