@@ -142,6 +142,19 @@ export default async function handler(req, res) {
       console.log('[/api/qa/next] created new task:', qaTaskId, 'for account:', accountName);
     }
 
+    // Update drive link status to 'in_progress' when QA starts
+    try {
+      await client.query(
+        `UPDATE drive_links
+         SET status = 'in_progress', qa_started_at = NOW(), updated_at = NOW()
+         WHERE full_url = $1`,
+        [driveUrl]
+      );
+      console.log('[/api/qa/next] updated drive link status to in_progress for:', driveUrl);
+    } catch (updateError) {
+      console.log('[/api/qa/next] drive link status update failed (non-critical):', updateError.message);
+    }
+
     await client.query('COMMIT');
 
     // Return task data structure expected by FrameQA component

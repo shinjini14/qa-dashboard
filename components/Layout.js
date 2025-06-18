@@ -17,7 +17,6 @@ import {
   Person,
   Dashboard,
   Assessment,
-  Add,
   Link as LinkIcon
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
@@ -41,8 +40,8 @@ export default function Layout({ children }) {
     logout();
   };
 
-  const handleAddDriveLinks = () => {
-    router.push('/admin'); // Navigate to admin page for drive links
+  const handleDashboard = () => {
+    router.push('/dashboard'); // Navigate to QA dashboard
   };
 
   const handleGoToQA = () => {
@@ -92,10 +91,10 @@ export default function Layout({ children }) {
           </Box>
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            {/* Add Drive Links Button */}
+            {/* Dashboard Button */}
             <Button
-              startIcon={<Add />}
-              onClick={handleAddDriveLinks}
+              startIcon={<Dashboard />}
+              onClick={handleDashboard}
               sx={{
                 textTransform: 'none',
                 fontWeight: 600,
@@ -113,7 +112,7 @@ export default function Layout({ children }) {
                 }
               }}
             >
-              Add Drive Links
+              Dashboard
             </Button>
 
             <Chip

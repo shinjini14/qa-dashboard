@@ -78,25 +78,36 @@ export default async function handler(req, res) {
     let insertColumns = ['file_id'];
     let insertValues = [fileId];
     let placeholders = ['$1'];
+    let paramCount = 2;
+
+    // Add URL column - check for full_url first, then other variants
+    const urlColumn = insertableColumns.find(c =>
+      c.column_name === 'full_url' ||
+      c.column_name === 'url' ||
+      c.column_name === 'drive_url' ||
+      c.column_name === 'link_url'
+    );
+
+    if (urlColumn) {
+      insertColumns.push(urlColumn.column_name);
+      insertValues.push(url);
+      placeholders.push(`$${paramCount}`);
+      paramCount++;
+    }
+
+    // Add status as 'pending' by default
+    if (insertableColumns.find(c => c.column_name === 'status')) {
+      insertColumns.push('status');
+      insertValues.push('pending');
+      placeholders.push(`$${paramCount}`);
+      paramCount++;
+    }
 
     // Add other columns if they exist and are insertable
     if (insertableColumns.find(c => c.column_name === 'created_at')) {
       insertColumns.push('created_at');
       insertValues.push('NOW()');
       placeholders.push('NOW()');
-    }
-
-    // If there's a url column (not full_url), use that
-    const urlColumn = insertableColumns.find(c => 
-      c.column_name === 'url' || 
-      c.column_name === 'drive_url' || 
-      c.column_name === 'link_url'
-    );
-    
-    if (urlColumn) {
-      insertColumns.push(urlColumn.column_name);
-      insertValues.push(url);
-      placeholders.push(`$${insertValues.length}`);
     }
 
     const insertQuery = `

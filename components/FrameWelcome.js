@@ -13,7 +13,9 @@ import {
   VideoLibrary,
   CheckCircle,
   Add,
-  Settings
+  Settings,
+  Pending,
+  Schedule
 } from '@mui/icons-material';
 import { useRouter } from 'next/router';
 import axios from 'axios';
@@ -42,12 +44,16 @@ export default function FrameWelcome({
   const [selectedDrive, setSelectedDrive] = useState('');
   const [reference, setReference]         = useState(null);
 
-  // 1️⃣ Fetch all Drive links
+  // 1️⃣ Fetch all Drive links (exclude completed ones from dropdown)
   useEffect(() => {
     axios.get('/api/drive-links')
       .then(res => {
         console.log('[FrameWelcome] driveLinks loaded:', res.data.driveLinks);
-        setDriveLinks(res.data.driveLinks);
+        // Filter out completed links from dropdown
+        const availableLinks = res.data.driveLinks.filter(link =>
+          link.status !== 'completed'
+        );
+        setDriveLinks(availableLinks);
       })
       .catch(err => {
         console.error('[FrameWelcome] failed to load drive-links:', err);
@@ -98,6 +104,23 @@ export default function FrameWelcome({
   }, [reference]);
 
   const canStart = Boolean(selectedDrive && selectedAccount);
+
+  // Get status icon and color
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case 'pending': return <Pending sx={{ fontSize: 16, color: '#ff9800' }} />;
+      case 'in_progress': return <Schedule sx={{ fontSize: 16, color: '#2196f3' }} />;
+      default: return <Pending sx={{ fontSize: 16, color: '#ff9800' }} />;
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'pending': return '#ff9800';
+      case 'in_progress': return '#2196f3';
+      default: return '#ff9800';
+    }
+  };
 
   // decide iframe src
   let embedSrc = null;
@@ -162,7 +185,23 @@ export default function FrameWelcome({
                     >
                       {driveLinks.map(dl => (
                         <MenuItem key={dl.id} value={dl.full_url}>
-                          {dl.file_id}
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
+                            <Typography sx={{ flex: 1 }}>
+                              {dl.file_id}
+                            </Typography>
+                            <Chip
+                              icon={getStatusIcon(dl.status || 'pending')}
+                              label={dl.status || 'pending'}
+                              size="small"
+                              sx={{
+                                fontSize: '0.7rem',
+                                height: 20,
+                                backgroundColor: `${getStatusColor(dl.status || 'pending')}20`,
+                                color: getStatusColor(dl.status || 'pending'),
+                                border: `1px solid ${getStatusColor(dl.status || 'pending')}40`
+                              }}
+                            />
+                          </Box>
                         </MenuItem>
                       ))}
                     </Select>
@@ -203,19 +242,19 @@ export default function FrameWelcome({
                           color="inherit"
                           size="small"
                           startIcon={<Add />}
-                          onClick={() => router.push('/admin')}
+                          onClick={() => router.push('/dashboard')}
                         >
-                          Add Links
+                          Go to Dashboard
                         </Button>
                       }
                     >
-                      No drive links available for QA. Add some drive links to get started.
+                      No drive links available for QA. Go to Dashboard to add drive links.
                     </Alert>
                   )}
 
                   {/* Action Buttons */}
                   <Grid container spacing={2}>
-                    <Grid item xs={12} sm={4}>
+                    <Grid item xs={12} sm={6}>
                       <Button
                         component="a"
                         href={selectedDrive || '#'}
@@ -234,25 +273,7 @@ export default function FrameWelcome({
                         {selectedDrive ? 'Open Selected Video' : 'Select a Video'}
                       </Button>
                     </Grid>
-                    <Grid item xs={12} sm={4}>
-                      <Button
-                        variant="outlined"
-                        fullWidth
-                        startIcon={<Add />}
-                        onClick={() => router.push('/admin')}
-                        sx={{
-                          borderColor: 'rgba(48, 79, 254, 0.5)',
-                          color: '#304ffe',
-                          '&:hover': {
-                            borderColor: '#304ffe',
-                            backgroundColor: 'rgba(48, 79, 254, 0.1)'
-                          }
-                        }}
-                      >
-                        Add Drive Links
-                      </Button>
-                    </Grid>
-                    <Grid item xs={12} sm={4}>
+                    <Grid item xs={12} sm={6}>
                       <Button
                         variant="contained"
                         fullWidth

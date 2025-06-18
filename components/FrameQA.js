@@ -74,35 +74,22 @@ export default function FrameQA({ step, task, onNext, onPrevious }) {
       { key:'adobeSpeed110',             label:'110%', group: 'Adobe Speed Settings' },
     ],
     2: [
-      // Caption Text Preset and Caption Animation
-      { key:'captionFont27',             label:'Font 27 - BalloonFont-Regular.otf', group: 'Caption Text Preset and Caption Animation', link: qaConfig.balloonFontUrl },
-      { key:'captionFontSize160',        label:'Font size 160', group: 'Caption Text Preset and Caption Animation' },
-      { key:'captionStroke14',           label:'Stroke 14 outer', group: 'Caption Text Preset and Caption Animation' },
-      { key:'captionBumpAnimation',      label:'Bump Animation 1 .prfpset', group: 'Caption Text Preset and Caption Animation', link: qaConfig.bumpAnimationUrl },
-
-      // Title Card Link and Title card preset
-      { key:'titleCardDownload',         label:'Download the title card on this link extrajaamarketing', group: 'Title Card Link and Title card preset', link: qaConfig.titleCardDownloadUrl },
-      { key:'titleCardPlacementMiddle',  label:'Title card placement Middle', group: 'Title Card Link and Title card preset' },
-      { key:'titleCardPreset',           label:'Title card preset Title Preset.prfpset', group: 'Title Card Link and Title card preset', link: qaConfig.titleCardPresetUrl },
-      { key:'startAnimationPopIn',       label:'Start animation pop in.prfpset', group: 'Title Card Link and Title card preset', link: qaConfig.startAnimationUrl },
-      { key:'endAnimationZoomOut',       label:'End animation Zoom out .prfpset', group: 'Title Card Link and Title card preset', link: qaConfig.endAnimationUrl },
+      // Quality Check Questions
+      { key:'currentBeaconsTitleCard',   label:'Does this have the current Beacons Title Card?', group: 'Quality Check Questions' },
+      { key:'correctTitleCardPosition',  label:'Does this title card have the correct positioning?', group: 'Quality Check Questions' },
+      { key:'sameBeginningAnimation',    label:'Does this title card have the same beginning Animation?', group: 'Quality Check Questions' },
+      { key:'sameEndAnimation',          label:'Does this title card have the same end Animation?', group: 'Quality Check Questions' },
+      { key:'sameCaptionAnimation',      label:'Does this have the same Caption Animation', group: 'Quality Check Questions' },
+      { key:'correctCaptionSettings',    label:'Does this have correct caption settings?', group: 'Quality Check Questions' },
 
       // This is only for short form Additional Process
       { key:'lastSentenceYellow',        label:'Last sentence should be yellow especially if the sentence is "Full story is linked below"', group: 'This is only for short form Additional Process' },
       { key:'redArrowCapcut',            label:'Add red arrow on it using capcut', group: 'This is only for short form Additional Process' },
     ],
     3: [
-      // Background For short and regular
-      { key:'backgroundAiSatisfying',    label:'AI Satisfying 📁 Ai videos With watermark*', group: 'Background For short and regular', link: qaConfig.aiSatisfyingFolderUrl },
-      { key:'backgroundOddlySatisfying', label:'Oddly Satisfying 📁 [ ALL ]Oddly V3 2 secs', group: 'Background For short and regular', link: qaConfig.oddlySatisfyingFolderUrl },
-
-      // Background process
-      { key:'backgroundClip1',           label:'Clip 1 - AI Satisfying', group: 'Background process' },
-      { key:'backgroundClip2',           label:'Clip 2 - Oddly', group: 'Background process' },
-      { key:'backgroundClip3',           label:'Clip 3 - AI Satisfying', group: 'Background process' },
-      { key:'backgroundClip4',           label:'Clip 4 - Oddly', group: 'Background process' },
-      { key:'backgroundClip5',           label:'Clip 5 - AI Satisfying', group: 'Background process' },
-      { key:'backgroundRestOddly',       label:'The rest of the clip should be Oddly Satisfying', group: 'Background process' },
+      // Background Quality Checks
+      { key:'correctBackground',         label:'Does this have the correct background?', group: 'Background Quality Checks' },
+      { key:'videoEndCorrectPlace',      label:'Does the video end at the correct place?', group: 'Background Quality Checks' },
 
       // Add background music to it
       { key:'backgroundMusicAdded',      label:'Open this document to know the process 📄 How to add music to videos', group: 'Add background music to it', link: qaConfig.musicProcessDocUrl },

@@ -259,54 +259,48 @@ export default function DriveLinksManager({ showWelcomeMessage = true }) {
                   backgroundColor: 'rgba(48,79,254,0.05)'
                 }}
               >
-                <ListItemText
-                  primary={
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <span style={{ fontSize: '16px' }}>{getContentTypeIcon(link.full_url)}</span>
-                        <Typography variant="body1" fontWeight={500}>
-                          {link.file_id}
-                        </Typography>
-                      </Box>
-                      <Chip
-                        label={getContentTypeLabel(link.full_url)}
-                        size="small"
-                        variant="outlined"
-                        sx={{
-                          fontSize: '0.7rem',
-                          height: 20,
-                          borderColor: 'rgba(48,79,254,0.3)',
-                          color: '#304ffe'
-                        }}
-                      />
-                      {link.status && (
-                        <Chip
-                          icon={getStatusIcon(link.status)}
-                          label={link.status || 'pending'}
-                          color={getStatusColor(link.status)}
-                          size="small"
-                        />
-                      )}
-                    </Box>
-                  }
-                  secondary={
-                    <Box sx={{ mt: 1 }}>
-                      <Typography variant="caption" color="text.secondary">
-                        Added: {new Date(link.created_at).toLocaleDateString()}
-                      </Typography>
-                      <br />
-                      <Typography 
-                        variant="caption" 
-                        sx={{ 
-                          wordBreak: 'break-all',
-                          color: 'text.secondary'
-                        }}
-                      >
-                        {link.full_url}
-                      </Typography>
-                    </Box>
-                  }
-                />
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', flex: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <span style={{ fontSize: '16px' }}>{getContentTypeIcon(link.full_url)}</span>
+                    <Typography variant="body1" fontWeight={500}>
+                      {link.file_id}
+                    </Typography>
+                  </Box>
+                  <Chip
+                    label={getContentTypeLabel(link.full_url)}
+                    size="small"
+                    variant="outlined"
+                    sx={{
+                      fontSize: '0.7rem',
+                      height: 20,
+                      borderColor: 'rgba(48,79,254,0.3)',
+                      color: '#304ffe'
+                    }}
+                  />
+                  {link.status && (
+                    <Chip
+                      icon={getStatusIcon(link.status)}
+                      label={link.status || 'pending'}
+                      color={getStatusColor(link.status)}
+                      size="small"
+                    />
+                  )}
+                </Box>
+                <Box sx={{ mt: 1 }}>
+                  <Typography variant="caption" color="text.secondary">
+                    Added: {new Date(link.created_at).toLocaleDateString()}
+                  </Typography>
+                  <br />
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      wordBreak: 'break-all',
+                      color: 'text.secondary'
+                    }}
+                  >
+                    {link.full_url}
+                  </Typography>
+                </Box>
                 <ListItemSecondaryAction>
                   <Box sx={{ display: 'flex', gap: 1 }}>
                     <IconButton

@@ -59,6 +59,19 @@ export default async function handler(req, res) {
 
     console.log('[QA Complete] Updated final_notes in DB:', updateResult.rows[0]?.final_notes);
 
+    // Update drive link status to 'completed' when QA finishes
+    try {
+      await client.query(
+        `UPDATE drive_links
+         SET status = 'completed', qa_completed_at = NOW(), updated_at = NOW()
+         WHERE full_url = $1`,
+        [task.drive_url]
+      );
+      console.log('[QA Complete] updated drive link status to completed for:', task.drive_url);
+    } catch (updateError) {
+      console.log('[QA Complete] drive link status update failed (non-critical):', updateError.message);
+    }
+
     await client.query('COMMIT');
 
     // Send notifications after successful DB update
