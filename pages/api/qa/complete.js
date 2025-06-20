@@ -83,6 +83,8 @@ export default async function handler(req, res) {
       step1Results: task.step1_results,
       step2Results: task.step2_results,
       step3Results: task.step3_results,
+      step4Results: task.step4_results,
+      step5Results: task.step5_results,
       finalNotes: final_notes,
       status: 'completed'
     };

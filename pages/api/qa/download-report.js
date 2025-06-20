@@ -145,6 +145,62 @@ STEP 3 RESULTS
     report += `\nNo Step 3 results available.\n`;
   }
 
+
+  report += `\n==========================================
+STEP 4 RESULTS
+==========================================
+`;
+
+if (task.step4_results) {
+  const step4 = task.step4_results;
+
+  if (step4.checks) {
+    report += `\nChecklist Items:\n`;
+    Object.entries(step4.checks).forEach(([key, checked]) => {
+      const label = getChecklistLabel(key, 4);
+      report += `  ${checked ? '✅' : '❌'} ${label}\n`;
+    });
+
+    const completedCount = Object.values(step4.checks).filter(Boolean).length;
+    const totalCount = Object.keys(step4.checks).length;
+    report += `\nStep 4 Progress: ${completedCount}/${totalCount} items completed\n`;
+  }
+
+  if (step4.comments) {
+    report += `\nStep 4 Comments:\n${step4.comments}\n`;
+  }
+} else {
+  report += `\nNo Step 4 results available.\n`;
+}
+
+report += `\n==========================================
+STEP 5 RESULTS
+==========================================
+`;
+
+if (task.step5_results) {
+  const step5 = task.step5_results;
+
+  if (step5.checks) {
+    report += `\nChecklist Items:\n`;
+    Object.entries(step5.checks).forEach(([key, checked]) => {
+      const label = getChecklistLabel(key, 5);
+      report += `  ${checked ? '✅' : '❌'} ${label}\n`;
+    });
+
+    const completedCount = Object.values(step5.checks).filter(Boolean).length;
+    const totalCount = Object.keys(step5.checks).length;
+    report += `\nStep 5 Progress: ${completedCount}/${totalCount} items completed\n`;
+  }
+
+  if (step5.comments) {
+    report += `\nStep 5 Comments:\n${step5.comments}\n`;
+  }
+} else {
+  report += `\nNo Step 5 results available.\n`;
+}
+
+
   if (task.final_notes) {
     report += `\n==========================================
 FINAL NOTES
@@ -200,6 +256,19 @@ Overall Status: ${task.status}
     totalItems += step3Checks.length;
     completedItems += step3Checks.filter(Boolean).length;
   }
+
+  if (task.step4_results?.checks) {
+  const step4Checks = Object.values(task.step4_results.checks);
+  totalItems += step4Checks.length;
+  completedItems += step4Checks.filter(Boolean).length;
+}
+
+if (task.step5_results?.checks) {
+  const step5Checks = Object.values(task.step5_results.checks);
+  totalItems += step5Checks.length;
+  completedItems += step5Checks.filter(Boolean).length;
+}
+
 
   if (totalItems > 0) {
     const percentage = Math.round((completedItems / totalItems) * 100);
