@@ -12,9 +12,9 @@ console.log('DB_PASS length:', process.env.DB_PASS?.length || 0);
 // Hardcoded database credentials (since .env is not loading)
 const requiredEnvVars = {
   user: 'postgres',
-  host: '34.93.195.0',
+  host: '34.10.59.242',
   database: 'postgres',
-  password: 'Plotpointe!@3456',
+  password: 'simplepass123',
   port: 5432
 };
 
